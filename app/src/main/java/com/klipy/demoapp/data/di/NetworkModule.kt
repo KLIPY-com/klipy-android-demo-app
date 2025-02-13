@@ -2,8 +2,8 @@ package com.klipy.demoapp.data.di
 
 import com.google.gson.GsonBuilder
 import com.klipy.demoapp.data.dto.MediaItemDto
-import com.klipy.demoapp.data.infrastructure.interceptor.AdsQueryParametersInterceptor
 import com.klipy.demoapp.data.dto.deserializer.MediaItemDtoDeserializer
+import com.klipy.demoapp.data.infrastructure.interceptor.AdsQueryParametersInterceptor
 import okhttp3.OkHttpClient
 import org.koin.core.qualifier.named
 import org.koin.dsl.module

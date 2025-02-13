@@ -2,10 +2,10 @@ package com.klipy.demoapp.data.datasource
 
 import com.klipy.demoapp.data.dto.request.ReportRequestDto
 import com.klipy.demoapp.data.dto.request.TriggerViewRequestDto
-import com.klipy.demoapp.data.mapper.MediaItemMapper
-import com.klipy.demoapp.data.service.MediaService
 import com.klipy.demoapp.data.infrastructure.ApiCallHelper
 import com.klipy.demoapp.data.infrastructure.DeviceInfoProvider
+import com.klipy.demoapp.data.mapper.MediaItemMapper
+import com.klipy.demoapp.data.service.MediaService
 import com.klipy.demoapp.domain.models.Category
 import com.klipy.demoapp.domain.models.MediaItem
 

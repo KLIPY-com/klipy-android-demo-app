@@ -1,8 +1,8 @@
 package com.klipy.demoapp.data.infrastructure.interceptor
 
 import android.os.Build
-import com.klipy.demoapp.data.infrastructure.DeviceInfoProvider
 import com.klipy.demoapp.data.infrastructure.AdvertisingInfoProvider
+import com.klipy.demoapp.data.infrastructure.DeviceInfoProvider
 import com.klipy.demoapp.data.infrastructure.ScreenMeasurementsProvider
 import okhttp3.Interceptor
 import okhttp3.Response

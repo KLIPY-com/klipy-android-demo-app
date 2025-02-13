@@ -1,9 +1,9 @@
 package com.klipy.demoapp.data.datasource
 
-import com.klipy.demoapp.data.mapper.MediaItemMapper
-import com.klipy.demoapp.data.service.GifService
 import com.klipy.demoapp.data.infrastructure.ApiCallHelper
 import com.klipy.demoapp.data.infrastructure.DeviceInfoProvider
+import com.klipy.demoapp.data.mapper.MediaItemMapper
+import com.klipy.demoapp.data.service.GifService
 
 /**
  * This class is implementing the interface MediaDataSource

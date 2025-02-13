@@ -229,7 +229,7 @@ fun MediaItems(
     onContainerMeasured: (Int, Int, Int, Int) -> Unit
 ) {
     val listState = rememberLazyListState()
-    val gap = 5.dp
+    val gap = 3.dp
     var containerWidth by remember { mutableStateOf(0.dp) }
     BoxWithConstraints(
         modifier = modifier

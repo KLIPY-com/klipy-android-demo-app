@@ -5,7 +5,6 @@ import com.klipy.demoapp.data.dto.MediaItemResponseDto
 import com.klipy.demoapp.data.dto.request.ReportRequestDto
 import com.klipy.demoapp.data.dto.request.TriggerViewRequestDto
 import com.klipy.demoapp.data.infrastructure.interceptor.AdsQueryParameters
-import com.klipy.demoapp.data.service.ClipsService.Companion.PREFIX
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
