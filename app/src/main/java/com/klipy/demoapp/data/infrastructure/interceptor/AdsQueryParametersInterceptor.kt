@@ -7,7 +7,6 @@ import com.klipy.demoapp.data.infrastructure.ScreenMeasurementsProvider
 import okhttp3.Interceptor
 import okhttp3.Response
 import retrofit2.Invocation
-import kotlin.random.Random
 
 class AdsQueryParametersInterceptor(
     private val deviceInfoProvider: DeviceInfoProvider,
@@ -34,9 +33,7 @@ class AdsQueryParametersInterceptor(
                 .addQueryParameter(AD_MIN_WIDTH, "50")
                 .addQueryParameter(AD_MAX_WIDTH, screenMeasurementsProvider.mediaSelectorContainer.width.toString())
                 .addQueryParameter(AD_MIN_HEIGHT, "50")
-                .addQueryParameter(AD_MAX_HEIGHT, "250")
-                // Randomly place the advertisement as the first or second item
-                .addQueryParameter(AD_POSITION, Random.nextInt(0, 2).toString())
+                .addQueryParameter(AD_MAX_HEIGHT, "200")
                 .apply {
                     val ifa = advertisingInfoProvider.getAdvertisingId()
                     if (ifa != null) {
@@ -81,7 +78,6 @@ class AdsQueryParametersInterceptor(
         const val AD_MAX_WIDTH = "ad-max-width"
         const val AD_MIN_HEIGHT = "ad-min-height"
         const val AD_MAX_HEIGHT = "ad-max-height"
-        const val AD_POSITION = "ad-position"
         const val USER_AGENT = "User-Agent"
         const val APP_VERSION = "ad-app-version"
         const val OS = "ad-os"

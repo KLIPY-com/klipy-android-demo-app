@@ -6,6 +6,8 @@ sealed interface MediaItemDto {
     data class GeneralMediaItemDto(
         @SerializedName("slug")
         val slug: String? = null,
+        @SerializedName("title")
+        val title: String? = null,
         @SerializedName("blur_preview")
         val placeHolder: String? = null,
         @SerializedName("file")
@@ -17,6 +19,8 @@ sealed interface MediaItemDto {
     data class ClipMediaItemDto(
         @SerializedName("slug")
         val slug: String? = null,
+        @SerializedName("title")
+        val title: String? = null,
         @SerializedName("blur_preview")
         val placeHolder: String? = null,
         @SerializedName("file_meta")

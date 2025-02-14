@@ -26,18 +26,11 @@ class MediaTypeDataInteractor(
                 canLoadMore = false
                 return@launch
             }
-            var category = categories.first()
-            var data =
-                klipyRepository.getMediaData(mediaType, category.title).getOrNull() ?: emptyList()
-            if (data.isEmpty()) {
-                categories.getOrNull(1)?.let {
-                    category = it
-                    data = klipyRepository.getMediaData(mediaType, category.title).getOrNull()
+            val category = categories.find { it.title.lowercase() == TRENDING }
+            val data = category?.let {
+                    klipyRepository.getMediaData(mediaType, category.title).getOrNull()
                         ?: emptyList()
-                } ?: run {
-                    canLoadMore = false
-                }
-            }
+            } ?: emptyList()
             onInitialDataFetched.invoke(categories, category, data)
         }
     }
@@ -65,5 +58,9 @@ class MediaTypeDataInteractor(
                 onMoreDataFetched.invoke(data)
             }
         }
+    }
+
+    private companion object {
+        const val TRENDING = "trending"
     }
 }

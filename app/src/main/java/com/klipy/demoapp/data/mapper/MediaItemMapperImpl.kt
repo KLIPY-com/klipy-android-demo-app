@@ -28,6 +28,7 @@ class MediaItemMapperImpl : MediaItemMapper {
                 }
                 MediaItem(
                     id = data.slug!!,
+                    title = data.title,
                     placeHolder = data.placeHolder?.base64toBitmap(),
                     lowQualityMetaData = selector,
                     highQualityMetaData = preview,
@@ -37,13 +38,14 @@ class MediaItemMapperImpl : MediaItemMapper {
 
             is MediaItemDto.GeneralMediaItemDto -> {
                 val fileType = data.file?.run {
-                    sm ?: md ?: hd ?: xs
+                    md ?: hd ?: xs
                 }
                 val highDefFileType = data.file?.run {
-                    hd ?: md ?: sm ?: xs
+                    hd ?: md ?: sm
                 }
                 MediaItem(
                     id = data.slug!!,
+                    title = data.title,
                     placeHolder = data.placeHolder?.base64toBitmap(),
                     lowQualityMetaData = fileType?.gif?.mapToDomain(),
                     highQualityMetaData = highDefFileType?.gif?.mapToDomain(),
@@ -63,6 +65,7 @@ class MediaItemMapperImpl : MediaItemMapper {
                 )
                 MediaItem(
                     id = "ad-${UUID.randomUUID()}",
+                    title = null,
                     placeHolder = null,
                     lowQualityMetaData = metaData,
                     highQualityMetaData = null,

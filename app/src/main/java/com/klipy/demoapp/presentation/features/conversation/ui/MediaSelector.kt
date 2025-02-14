@@ -168,7 +168,8 @@ fun Toolbar(
                     if (isSearchFocused) {
                         Modifier.weight(1F)
                     } else {
-                        Modifier.width(200.dp)
+                        Modifier.wrapContentWidth()
+                            .padding(end = 10.dp)
                     }
                 ),
             text = searchInput,
@@ -229,7 +230,7 @@ fun MediaItems(
     onContainerMeasured: (Int, Int, Int, Int) -> Unit
 ) {
     val listState = rememberLazyListState()
-    val gap = 3.dp
+    val gap = 1.dp
     var containerWidth by remember { mutableStateOf(0.dp) }
     BoxWithConstraints(
         modifier = modifier

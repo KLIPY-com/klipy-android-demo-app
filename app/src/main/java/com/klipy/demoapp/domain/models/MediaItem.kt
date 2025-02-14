@@ -5,6 +5,7 @@ import com.klipy.demoapp.presentation.features.conversation.model.MediaType
 
 data class MediaItem(
     val id: String,
+    val title: String?,
     val placeHolder: Bitmap?,
     val lowQualityMetaData: MetaData?,
     val highQualityMetaData: MetaData?,

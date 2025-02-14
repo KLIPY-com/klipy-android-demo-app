@@ -30,8 +30,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.klipy.demoapp.presentation.features.conversationlist.model.ConversationUiModel
 import com.klipy.demoapp.presentation.theme.KlipyDemoAppTheme
 
@@ -86,7 +88,11 @@ private fun Toolbar() {
         title = {
             Box(modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center) {
-                Text("Klipy")
+                Text(
+                    text = "KLIPY",
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Medium
+                )
             }
         },
         navigationIcon = {
