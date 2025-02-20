@@ -71,7 +71,9 @@ val dataModule = module {
     }
 
     single<DeviceInfoProvider> { DeviceInfoProviderImpl(get()) }
-    single<ScreenMeasurementsProvider> { ScreenMeasurementsProviderImpl() }
+    single<ScreenMeasurementsProvider> {
+        ScreenMeasurementsProviderImpl(androidApplication().applicationContext)
+    }
     single<AdvertisingInfoProvider> {
         AdvertisingInfoProviderImpl(androidApplication().applicationContext)
     }
