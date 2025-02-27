@@ -11,10 +11,13 @@ typealias MediaItemRow = List<MediaItemUIModel>
 object MasonryMeasurementsCalculator {
     private const val ITEM_MIN_HEIGHT = 50
     private const val ITEM_MAX_HEIGHT = 180
-    private const val MAX_ITEMS_PER_ROW = 3
+    private const val MAX_ITEMS_PER_ROW = 4
 
     private var calculatedItems = mutableListOf<MediaItem>()
     private var calculatedResults = mutableListOf<MediaItemRow>()
+
+    var itemMinWidth: Int = 0
+    var adMaxResizePercentage: Float = 0F
 
     /**
      * Splits a list of items into rows based on a maximum number of items per row.
@@ -85,7 +88,6 @@ object MasonryMeasurementsCalculator {
         var currentMaxHeight = ITEM_MAX_HEIGHT
 
         val adIndex = possibleItemsInRow.indexOfFirst { it.isAD() }
-        val adsInRow = possibleItemsInRow.filter { it.isAD() }
         if (adIndex > 1) {
             possibleItemsInRow = possibleItemsInRow.subList(0, 2)
         } else if (adIndex >= 0) {
@@ -93,6 +95,7 @@ object MasonryMeasurementsCalculator {
             currentMaxHeight = possibleItemsInRow[adIndex].lowQualityMetaData!!.height
         }
 
+        // Select the best-fitting row of items by adjusting height to minimize width difference from the container.
         for (height in currentMinHeight..currentMaxHeight) {
             val itemsInRow = mutableListOf<MediaItemUIModel>()
             for (element in possibleItemsInRow) {
@@ -120,19 +123,58 @@ object MasonryMeasurementsCalculator {
             }
         }
 
+        // Set item heights, adjust non-ad item widths, and keep ad widths unchanged.
+        val nonAdItems = currentRow.filter { it.mediaItem.isAD().not() }
         currentRow.forEachIndexed { index, item ->
-            val adNumber = if (adsInRow.isNotEmpty()) 1 else 0
             val addition = if (item.mediaItem.isAD()) {
                 0
             } else {
-                minimumChange / (currentRow.size - adNumber)
+                minimumChange / nonAdItems.size
             }
-            currentRow[index] = item.copy(
-                measuredWidth = item.measuredWidth + addition,
+            currentRow[index].apply {
+                measuredWidth = item.measuredWidth + addition
                 measuredHeight = itemsHeightInRow
-            )
+            }
         }
 
+        // Ensure all items fit by setting minimum widths and resizing the ad if necessary.
+        if (adIndex >= 0 && nonAdItems.size != currentRow.size) {
+            // Find items with width less than the minimum allowed width
+            val itemsBelowMinWidth = nonAdItems.filter { it.measuredWidth < itemMinWidth }
+            if (itemsBelowMinWidth.isNotEmpty()) {
+                // Set all such items to the minimum width
+                itemsBelowMinWidth.forEach {
+                    it.measuredWidth = itemMinWidth
+                }
+                // Compute the updated total row width, including gaps
+                val newRowWidth =
+                    currentRow.sumOf { it.measuredWidth } + (currentRow.size - 1) * gap
+
+                if (newRowWidth > containerWidth) {
+                    // Adjust the advertisement width to fit within the container
+                    val adItem = currentRow[adIndex]
+                    val minAdWidth = (adItem.measuredWidth * (1F - adMaxResizePercentage)).toInt()
+                    var resizedAdWidth = adItem.measuredWidth - (newRowWidth - containerWidth)
+                    if (resizedAdWidth < minAdWidth) {
+                        val adWidthDifference = minAdWidth - resizedAdWidth
+                        itemsBelowMinWidth.forEach {
+                            it.measuredWidth -= adWidthDifference / itemsBelowMinWidth.size
+                        }
+                        resizedAdWidth = minAdWidth
+                    }
+
+                    // Scale ad height proportionally to maintain aspect ratio
+                    adItem.measuredHeight =
+                        (adItem.measuredHeight * (resizedAdWidth / adItem.measuredWidth.toFloat())).toInt()
+                    adItem.measuredWidth = resizedAdWidth
+
+                    // Update height of all resized items to match the advertisement
+                    itemsBelowMinWidth.forEach {
+                        it.measuredHeight = adItem.measuredHeight
+                    }
+                }
+            }
+        }
         return currentRow
     }
 

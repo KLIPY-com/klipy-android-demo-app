@@ -2,13 +2,13 @@ package com.klipy.demoapp.data.datasource
 
 import com.klipy.demoapp.presentation.features.conversation.model.MediaType
 
-interface MediaDataSourceManager {
+interface MediaDataSourceSelector {
     fun getDataSource(mediaType: MediaType): MediaDataSource
 }
 
-class MediaDataSourceManagerImpl(
+class MediaDataSourceSelectorImpl(
     private val mediaDataSourceFactory: MediaDataSourceFactory
-) : MediaDataSourceManager {
+) : MediaDataSourceSelector {
 
     private var lastMediaType: MediaType? = null
 

@@ -8,8 +8,8 @@ import com.klipy.demoapp.data.datasource.HealthCheckDataSourceImpl
 import com.klipy.demoapp.data.datasource.MediaDataSource
 import com.klipy.demoapp.data.datasource.MediaDataSourceFactory
 import com.klipy.demoapp.data.datasource.MediaDataSourceFactoryImpl
-import com.klipy.demoapp.data.datasource.MediaDataSourceManager
-import com.klipy.demoapp.data.datasource.MediaDataSourceManagerImpl
+import com.klipy.demoapp.data.datasource.MediaDataSourceSelector
+import com.klipy.demoapp.data.datasource.MediaDataSourceSelectorImpl
 import com.klipy.demoapp.data.datasource.StickersDataSource
 import com.klipy.demoapp.data.infrastructure.AdvertisingInfoProvider
 import com.klipy.demoapp.data.infrastructure.AdvertisingInfoProviderImpl
@@ -63,8 +63,8 @@ val dataModule = module {
         HealthCheckDataSourceImpl(get(), get(), get())
     }
 
-    factory<MediaDataSourceManager> {
-        MediaDataSourceManagerImpl(get())
+    factory<MediaDataSourceSelector> {
+        MediaDataSourceSelectorImpl(get())
     }
     single<MediaDataSourceFactory> {
         MediaDataSourceFactoryImpl(getAll())

@@ -7,7 +7,7 @@ import com.klipy.demoapp.data.infrastructure.DeviceInfoProvider
 import com.klipy.demoapp.data.mapper.MediaItemMapper
 import com.klipy.demoapp.data.service.MediaService
 import com.klipy.demoapp.domain.models.Category
-import com.klipy.demoapp.domain.models.MediaItem
+import com.klipy.demoapp.domain.models.MediaData
 
 /**
  * General implementation of datasource for each media types: GIF, Clip, Sticker
@@ -44,8 +44,8 @@ class MediaDataSourceImpl(
         }
     }
 
-    override suspend fun getMediaData(filter: String, page: Int?): Result<List<MediaItem>> {
-        if (filter.isEmpty()) return Result.success(emptyList())
+    override suspend fun getMediaData(filter: String, page: Int?): Result<MediaData> {
+        if (filter.isEmpty()) return Result.success(MediaData.EMPTY)
 
         if (filter != currentFilter) {
             // We need to reset state, if search input is changed or other category is selected
@@ -72,14 +72,18 @@ class MediaDataSourceImpl(
                 }
             }.mapCatching {
                 canRequestMoreData = it.data?.hasNext == true
-                it.data?.data?.map { mediaItem ->
-                    mediaItemMapper.mapToDomain(mediaItem)
-                } ?: emptyList()
+                MediaData(
+                    mediaItems = it.data?.data?.map { mediaItem ->
+                        mediaItemMapper.mapToDomain(mediaItem)
+                    } ?: emptyList(),
+                    itemMinWidth = it.data?.meta?.itemMinWidth ?: 0,
+                    adMaxResizePercentage = (it.data?.meta?.adMaxResizePercentage ?: 0) / 100F
+                )
             }.onFailure {
                 canRequestMoreData = false
             }
         } else {
-            Result.success(emptyList())
+            Result.success(MediaData.EMPTY)
         }
     }
 
@@ -113,7 +117,7 @@ class MediaDataSourceImpl(
     }
 
     private fun String.toCategoryUrl(): String {
-        return "https://api.klipy.co/assets/images/category/${this}.png"
+        return "https://api.klipy.com/assets/images/category/${this}.png"
     }
 
     private companion object {

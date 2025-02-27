@@ -16,6 +16,7 @@ class HealthCheckDataSourceImpl(
 ): HealthCheckDataSource {
 
     override suspend fun getHealthyMediaTypes(): List<MediaType> {
+        // We are calling health check service and filtering all mediaType that isAlive = true
         return apiCallHelper.makeApiCall {
             healthCheckService.healthCheck(deviceInfoProvider.getDeviceId())
         }.mapCatching { result ->

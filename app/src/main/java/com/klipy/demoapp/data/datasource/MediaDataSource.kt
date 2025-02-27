@@ -1,14 +1,14 @@
 package com.klipy.demoapp.data.datasource
 
 import com.klipy.demoapp.domain.models.Category
-import com.klipy.demoapp.domain.models.MediaItem
+import com.klipy.demoapp.domain.models.MediaData
 
 /**
  * General interface of datasource for each media types: GIF, Clip, Sticker
  */
 interface MediaDataSource {
     suspend fun getCategories(): Result<List<Category>>
-    suspend fun getMediaData(filter: String, page: Int?): Result<List<MediaItem>>
+    suspend fun getMediaData(filter: String, page: Int?): Result<MediaData>
     suspend fun triggerShare(slug: String): Result<Any>
     suspend fun triggerView(slug: String): Result<Any>
     suspend fun report(slug: String, reason: String): Result<Any>

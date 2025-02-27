@@ -1,7 +1,7 @@
 package com.klipy.demoapp.domain
 
 import com.klipy.demoapp.domain.models.Category
-import com.klipy.demoapp.domain.models.MediaItem
+import com.klipy.demoapp.domain.models.MediaData
 import com.klipy.demoapp.presentation.features.conversation.model.MediaType
 
 
@@ -10,7 +10,7 @@ interface KlipyRepository {
 
     suspend fun getCategories(mediaType: MediaType): Result<List<Category>>
 
-    suspend fun getMediaData(mediaType: MediaType, filter: String) : Result<List<MediaItem>>
+    suspend fun getMediaData(mediaType: MediaType, filter: String) : Result<MediaData>
 
     suspend fun triggerShare(mediaType: MediaType, id: String): Result<Any>
 

@@ -21,7 +21,7 @@ val networkModule = module {
     single {
         val secretKey: String = get(named("secretKey"))
         Retrofit.Builder()
-            .baseUrl("https://api.klipy.co/api/v1/$secretKey/")
+            .baseUrl("https://api.klipy.com/api/v1/$secretKey/")
             .client(get())
             .addConverterFactory(GsonConverterFactory.create(get()))
             .build()

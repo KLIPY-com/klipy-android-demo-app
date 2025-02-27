@@ -1,9 +1,11 @@
 package com.klipy.demoapp.presentation.features.conversation.model
 
+import androidx.compose.runtime.Stable
 import com.klipy.demoapp.domain.models.MediaItem
 
+@Stable
 data class MediaItemUIModel(
     val mediaItem: MediaItem,
-    val measuredWidth: Int,
-    val measuredHeight: Int
+    var measuredWidth: Int,
+    var measuredHeight: Int
 )

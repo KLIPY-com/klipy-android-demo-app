@@ -2,7 +2,9 @@ package com.klipy.demoapp.presentation.features.conversation
 
 import com.klipy.demoapp.domain.KlipyRepository
 import com.klipy.demoapp.domain.models.Category
+import com.klipy.demoapp.domain.models.MediaData
 import com.klipy.demoapp.domain.models.MediaItem
+import com.klipy.demoapp.presentation.algorithm.MasonryMeasurementsCalculator
 import com.klipy.demoapp.presentation.features.conversation.model.MediaType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -29,9 +31,11 @@ class MediaTypeDataInteractor(
             val category = categories.find { it.title.lowercase() == TRENDING }
             val data = category?.let {
                     klipyRepository.getMediaData(mediaType, category.title).getOrNull()
-                        ?: emptyList()
-            } ?: emptyList()
-            onInitialDataFetched.invoke(categories, category, data)
+                        ?: MediaData.EMPTY
+            } ?: MediaData.EMPTY
+            MasonryMeasurementsCalculator.itemMinWidth = data.itemMinWidth
+            MasonryMeasurementsCalculator.adMaxResizePercentage = data.adMaxResizePercentage
+            onInitialDataFetched.invoke(categories, category, data.mediaItems)
         }
     }
 
@@ -51,11 +55,14 @@ class MediaTypeDataInteractor(
         if (canLoadMore) {
             coroutineScope.launch {
                 val data =
-                    klipyRepository.getMediaData(mediaType, filter).getOrNull() ?: emptyList()
-                if (data.isEmpty()) {
+                    klipyRepository.getMediaData(mediaType, filter).getOrNull() ?: MediaData.EMPTY
+                if (data.mediaItems.isEmpty()) {
                     canLoadMore = false
+                } else {
+                    MasonryMeasurementsCalculator.itemMinWidth = data.itemMinWidth
+                    MasonryMeasurementsCalculator.adMaxResizePercentage = data.adMaxResizePercentage
                 }
-                onMoreDataFetched.invoke(data)
+                onMoreDataFetched.invoke(data.mediaItems)
             }
         }
     }
