@@ -10,6 +10,18 @@ The goal of this demo is to provide developers with a simple and clear example o
 
 This implementation is **not mandatory** but serves as one possible approach. Developers can use this as a starting point and modify it as needed to fit their applications.
 
+## Table of Contents
+
+- [Project Structure & Architecture](#project-structure--architecture)
+  - [Architecture Overview](#architecture-overview)
+  - [Technologies Used](#technologies-used)
+- [Application Flow](#application-flow)
+  - [1. Health Check - Determining Available Media Types](#1-health-check---determining-available-media-types)
+  - [2. Fetching Categories & Trending Media](#2-fetching-categories--trending-media)
+  - [3. Handling Media Interactions](#3-handling-media-interactions)
+  - [4. Algorithm](#algorithm)
+  - [5. Ads](#ads)
+
 ## Project Structure & Architecture
 
 This demo app follows the **MVVM (Model-View-ViewModel) architecture** with the **Repository Pattern** to ensure a clean and maintainable codebase. It also adopts **ViewState** for state management and separates concerns using a **Presentation/Domain/Data** layer approach.
