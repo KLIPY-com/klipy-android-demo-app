@@ -184,3 +184,5 @@ object MasonryMeasurementsCalculator {
     }
 
 }
+
+fun MediaItemRow.hasAd() = this.firstOrNull { it.mediaItem.isAD() } != null

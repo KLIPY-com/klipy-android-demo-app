@@ -2,7 +2,6 @@
 
 package com.klipy.demoapp.presentation.features.conversation.ui
 
-import android.view.ViewGroup
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -32,12 +31,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.zIndex
 import co.kikliko.android.ads_sdk.GIFWebView
 import co.kikliko.android.ads_sdk.KlipyContent
 import coil3.compose.rememberAsyncImagePainter
 import com.klipy.demoapp.domain.models.MediaItem
 import com.klipy.demoapp.domain.models.isAD
 import com.klipy.demoapp.presentation.algorithm.MediaItemRow
+import com.klipy.demoapp.presentation.algorithm.hasAd
 import com.klipy.demoapp.presentation.features.conversation.model.MediaType
 import com.klipy.demoapp.presentation.uicomponents.GifImage
 
@@ -53,7 +54,8 @@ fun MediaContent(
             .fillMaxWidth()
             .height(
                 data.first().measuredHeight.dp
-            ),
+            )
+            .zIndex(if (data.hasAd()) 0F else 1F),
         horizontalArrangement = Arrangement.spacedBy(gap)
     ) {
         data.forEach {
@@ -63,7 +65,8 @@ fun MediaContent(
                 AdMediaItem(
                     modifier = Modifier
                         .width(itemWidth)
-                        .fillMaxHeight(),
+                        .fillMaxHeight()
+                        .zIndex(0F),
                     content = mediaItem.lowQualityMetaData?.url,
                     width = it.measuredWidth,
                     height = it.measuredHeight
@@ -80,7 +83,8 @@ fun MediaContent(
                             onLongClick = {
                                 onMediaItemLongClicked(mediaItem)
                             }
-                        ),
+                        )
+                        .zIndex(1F),
                     mediaItem = mediaItem
                 )
             } else {
@@ -95,7 +99,8 @@ fun MediaContent(
                             onLongClick = {
                                 onMediaItemLongClicked(mediaItem)
                             }
-                        ),
+                        )
+                        .zIndex(1F),
                     key = mediaItem,
                     url = mediaItem.lowQualityMetaData?.url,
                     contentScale = ContentScale.Crop,
@@ -114,29 +119,21 @@ fun AdMediaItem(
     width: Int,
     height: Int
 ) {
-    val density = LocalDensity.current
-    val widthPx = with(density) { width.dp.toPx().toInt() }
-    val heightPx = with(density) { height.dp.toPx().toInt() }
     AndroidView(
         modifier = modifier,
         factory = { ctx ->
             GIFWebView(ctx).apply {
                 setBackgroundColor(android.graphics.Color.TRANSPARENT)
-                layoutParams = ViewGroup.LayoutParams(widthPx, heightPx)
-                val klipyContent = KlipyContent(
-                    isWebView = true,
-                    content = content ?: "",
-                    width = width,
-                    height = height
-                )
-                this.loadContent(klipyContent)
             }
         },
         update = {
-            val newLayoutParams = it.layoutParams
-            newLayoutParams.width = widthPx
-            newLayoutParams.height = heightPx
-            it.layoutParams = newLayoutParams
+            val klipyContent = KlipyContent(
+                isWebView = true,
+                content = content ?: "",
+                width = width,
+                height = height
+            )
+            it.loadContent(klipyContent)
         },
         onRelease = {
             it.removeAllViews()
