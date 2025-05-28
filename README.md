@@ -1,4 +1,4 @@
-## Introduction
+## KLIPY GIF API Android Demo Application
 
 This is a demo Android application showcasing the integration of the [Klipy API](https://klipy.com/api) for fetching **GIFs, Clips, and Stickers**. The app serves as a reference implementation, demonstrating how to interact with the API, fetch media content, and display it in an Android application.
 
