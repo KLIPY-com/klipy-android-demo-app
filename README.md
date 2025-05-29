@@ -1,6 +1,6 @@
 ## KLIPY GIF API Android Demo Application
 
-This is a demo Android application showcasing the integration of the [Klipy API](https://klipy.com/api) for fetching **GIFs, Clips, and Stickers**. The app serves as a reference implementation, demonstrating how to interact with the API, fetch media content, and display it in an Android application.
+This is a demo Android application that showcases the integration of the [Klipy API](https://klipy.com/api) for getting GIFs, Clips, and Stickers from our library. The app is a reference integration that demonstrates how to interact with our API, fetch media content, and display it in an Android application.
 
 ### Purpose
 The goal of this demo is to provide developers with a simple and clear example of how to:
@@ -8,7 +8,7 @@ The goal of this demo is to provide developers with a simple and clear example o
 - Display media content in a user-friendly UI.
 - Implement basic API interactions within an Android project.
 
-This implementation is **not mandatory** but serves as one possible approach. Developers can use this as a starting point and modify it as needed to fit their applications.
+This implementation is not mandatory, but we provided it as one possible approach. Developers can use this as a starting point and modify it as needed to fit their applications.
 
 ## Table of Contents
 
