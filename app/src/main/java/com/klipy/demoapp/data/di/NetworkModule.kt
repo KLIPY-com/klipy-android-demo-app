@@ -5,6 +5,7 @@ import com.klipy.demoapp.data.dto.MediaItemDto
 import com.klipy.demoapp.data.dto.deserializer.MediaItemDtoDeserializer
 import com.klipy.demoapp.data.infrastructure.interceptor.AdsQueryParametersInterceptor
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
@@ -28,8 +29,15 @@ val networkModule = module {
     }
 
     single {
+        HttpLoggingInterceptor().apply {
+            setLevel(HttpLoggingInterceptor.Level.BASIC)
+        }
+    }
+
+    single {
         OkHttpClient.Builder()
             .addInterceptor(get<AdsQueryParametersInterceptor>())
+            .addInterceptor(get<HttpLoggingInterceptor>())
             .readTimeout(30, TimeUnit.SECONDS)
             .connectTimeout(30, TimeUnit.SECONDS)
             .build()

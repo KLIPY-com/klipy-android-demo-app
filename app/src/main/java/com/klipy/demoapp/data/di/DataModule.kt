@@ -3,8 +3,6 @@ package com.klipy.demoapp.data.di
 import com.klipy.demoapp.data.KlipyRepositoryImpl
 import com.klipy.demoapp.data.datasource.ClipsDataSource
 import com.klipy.demoapp.data.datasource.GifsDataSource
-import com.klipy.demoapp.data.datasource.HealthCheckDataSource
-import com.klipy.demoapp.data.datasource.HealthCheckDataSourceImpl
 import com.klipy.demoapp.data.datasource.MediaDataSource
 import com.klipy.demoapp.data.datasource.MediaDataSourceFactory
 import com.klipy.demoapp.data.datasource.MediaDataSourceFactoryImpl
@@ -22,7 +20,6 @@ import com.klipy.demoapp.data.mapper.MediaItemMapper
 import com.klipy.demoapp.data.mapper.MediaItemMapperImpl
 import com.klipy.demoapp.data.service.ClipsService
 import com.klipy.demoapp.data.service.GifService
-import com.klipy.demoapp.data.service.HealthCheckService
 import com.klipy.demoapp.data.service.StickersService
 import com.klipy.demoapp.domain.KlipyRepository
 import org.koin.android.ext.koin.androidApplication
@@ -40,12 +37,9 @@ val dataModule = module {
     single<ClipsService> {
         get<Retrofit>().create(ClipsService::class.java)
     }
-    single<HealthCheckService> {
-        get<Retrofit>().create(HealthCheckService::class.java)
-    }
 
     factory<KlipyRepository> {
-        KlipyRepositoryImpl(get(), get())
+        KlipyRepositoryImpl(get())
     }
 
     single<MediaItemMapper> { MediaItemMapperImpl() }
@@ -58,9 +52,6 @@ val dataModule = module {
     }
     factory<MediaDataSource>(named(CLIPS_DS)) {
         ClipsDataSource(get(), get(), get(), get())
-    }
-    factory<HealthCheckDataSource> {
-        HealthCheckDataSourceImpl(get(), get(), get())
     }
 
     factory<MediaDataSourceSelector> {

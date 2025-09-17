@@ -70,6 +70,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson.converter)
+    implementation(libs.okhttp.logging.interceptor)
     implementation(libs.koin)
     implementation(libs.koin.compose)
     implementation(libs.coil.network)

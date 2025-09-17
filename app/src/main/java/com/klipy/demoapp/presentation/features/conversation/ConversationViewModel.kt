@@ -126,9 +126,10 @@ class ConversationViewModel(
             )
         }
         viewModelScope.debounceSearch {
-            if (input.isNotBlank()) {
+            if (input.isNotBlank() && input != _viewState.value.lastSearchedInput) {
                 _viewState.update {
                     it.copy(
+                        lastSearchedInput = input,
                         chosenCategory = null,
                         mediaItems = emptyList(),
                         isLoading = true

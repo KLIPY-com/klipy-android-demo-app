@@ -1,6 +1,5 @@
 package com.klipy.demoapp.data
 
-import com.klipy.demoapp.data.datasource.HealthCheckDataSource
 import com.klipy.demoapp.data.datasource.MediaDataSourceSelector
 import com.klipy.demoapp.domain.KlipyRepository
 import com.klipy.demoapp.domain.models.Category
@@ -8,12 +7,11 @@ import com.klipy.demoapp.domain.models.MediaData
 import com.klipy.demoapp.presentation.features.conversation.model.MediaType
 
 class KlipyRepositoryImpl(
-    private val healthCheckDataSource: HealthCheckDataSource,
     private val mediaDataSourceManager: MediaDataSourceSelector,
 ) : KlipyRepository {
 
     override suspend fun getAvailableMediaTypes(): List<MediaType> {
-        return healthCheckDataSource.getHealthyMediaTypes()
+        return MediaType.entries.toList()
     }
 
     override suspend fun getCategories(mediaType: MediaType): Result<List<Category>> {

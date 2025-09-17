@@ -19,6 +19,7 @@ data class ConversationViewState(
     val mediaTypes: List<MediaType>? = null,
     val chosenMediaType: MediaType? = null,
     val searchInput: String = "",
+    val lastSearchedInput: String = "",
     val mediaItems: List<MediaItem> = emptyList(),
     val selectedMediaItem: MediaItem? = null,
     val playingClip: ClipMessage? = null
