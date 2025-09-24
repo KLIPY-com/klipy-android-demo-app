@@ -82,7 +82,7 @@ private val mockMessages2 = listOf(
         isFromCurrentUser = false
     ),
     GifMessage(
-        url = "https://static.klipy.com/ii/c98c4a4935d23b95805f0befee091d8a/e5/bb/FHYQfewc.gif",
+        url = "https://static.klipy.com/ii/bea85337777ad0e23e63683391435543/6d/be/raThpJyc.gif",
         width = 499,
         height = 499,
         isFromCurrentUser = false
@@ -103,9 +103,9 @@ private val mockMessages3 = listOf(
         isFromCurrentUser = false
     ),
     GifMessage(
-        url = "https://static.klipy.com/ii/c98c4a4935d23b95805f0befee091d8a/a1/7e/YG9FpzVE.gif",
-        width = 240,
-        height = 340,
+        url = "https://static.klipy.com/ii/d7aec6f6f171607374b2065c836f92f4/0a/3a/kiKi6leN.gif",
+        width = 640,
+        height = 400,
         isFromCurrentUser = false
     ),
 )

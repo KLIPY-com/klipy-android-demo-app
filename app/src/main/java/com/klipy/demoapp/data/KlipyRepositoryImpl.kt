@@ -11,7 +11,7 @@ class KlipyRepositoryImpl(
 ) : KlipyRepository {
 
     override suspend fun getAvailableMediaTypes(): List<MediaType> {
-        return MediaType.entries.toList()
+        return listOf(MediaType.GIF, MediaType.STICKER, MediaType.CLIP)
     }
 
     override suspend fun getCategories(mediaType: MediaType): Result<List<Category>> {

@@ -16,14 +16,14 @@ class MediaItemMapperImpl : MediaItemMapper {
                     MetaData(
                         url = it,
                         width = data.fileMeta!!.gif!!.width!!,
-                        height = data.fileMeta.gif!!.height!!
+                        height = data.fileMeta.gif.height!!
                     )
                 }
                 val preview = data.file?.mp4?.let {
                     MetaData(
                         url = it,
                         width = data.fileMeta!!.mp4!!.width!!,
-                        height = data.fileMeta.mp4!!.height!!
+                        height = data.fileMeta.mp4.height!!
                     )
                 }
                 MediaItem(
