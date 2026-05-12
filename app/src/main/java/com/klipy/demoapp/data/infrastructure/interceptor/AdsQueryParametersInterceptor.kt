@@ -30,6 +30,7 @@ class AdsQueryParametersInterceptor(
                 //  It is used for analytics and displaying relevant trending and search results.
                 //  For the sake of simplicity, we are using device id
                 .addQueryParameter(CUSTOMER_ID, deviceInfoProvider.getDeviceId())
+                .addQueryParameter(AD_IFRAME, ENABLED)
                 .addQueryParameter(LOCALE, Locale.getDefault().language)
                 .addQueryParameter(AD_MIN_WIDTH, "50")
                 .addQueryParameter(
@@ -97,6 +98,7 @@ class AdsQueryParametersInterceptor(
 
     private companion object {
         const val CUSTOMER_ID = "customer_id"
+        const val AD_IFRAME = "ad-iframe"
         const val AD_MIN_WIDTH = "ad-min-width"
         const val AD_MAX_WIDTH = "ad-max-width"
         const val AD_MIN_HEIGHT = "ad-min-height"
@@ -117,5 +119,6 @@ class AdsQueryParametersInterceptor(
         const val AD_CARRIER = "ad-carrier"
         const val AD_MCCMNC = "ad-mccmnc"
         const val AD_LANGUAGE = "ad-language"
+        const val ENABLED = "1"
     }
 }
