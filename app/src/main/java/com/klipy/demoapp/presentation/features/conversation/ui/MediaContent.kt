@@ -128,7 +128,7 @@ fun AdMediaItem(
         },
         update = {
             val klipyContent = KlipyContent(
-                isWebView = true,
+                isWebView = false,
                 content = content ?: "",
                 width = width,
                 height = height
