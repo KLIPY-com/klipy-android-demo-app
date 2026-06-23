@@ -1,5 +1,5 @@
 [versions]
-agp = "8.8.0"
+agp = "8.9.1"
 kotlin = "2.1.0"
 coreKtx = "1.15.0"
 junit = "4.13.2"
@@ -41,7 +41,7 @@ coil-network = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", versi
 coil-gif = { group = "io.coil-kt.coil3", name = "coil-gif", version.ref = "coil" }
 androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "androidx-media3" }
 androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "androidx-media3" }
-kikliko = { group = "com.gitlab.kikliko", name = "ads-android", version = "1.0.0" }
+kikliko = { group = "com.gitlab.kikliko", name = "ads-android", version = "1.1.2" }
 gms-ads = { group = "com.google.android.gms", name = "play-services-ads-identifier", version = "18.2.0" }
 
 [plugins]
