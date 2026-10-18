@@ -6,6 +6,29 @@
 
 This is a demo Android application that showcases the integration of the [Klipy API](https://klipy.com/api) for getting GIFs, Clips, and Stickers from our library. The app is a reference integration that demonstrates how to interact with our API, fetch media content, and display it in an Android application.
 
+### Download the demo APK
+
+[Download KLIPY-Demo-App.apk](https://github.com/KLIPY-com/klipy-android-demo-app/raw/refs/heads/main/KLIPY-Demo-App.apk).
+The 2026-10-18 build includes the published **ads-android 1.1.4** SDK. The demo
+application version remains `1.0` (version code `1`). This is a debug-signed demo
+using the default cached demo feed; it does not contain the production-placement
+QA key. Its certificate matches the previous checked-in APK for in-place updates.
+
+APK SHA-256:
+`e878fa168ab4241756848ec694852191e4f6d8a5495c89ac50d4d29a5499c60d`.
+
+To rebuild the public download, leave the production key empty and use the normal
+Maven dependency without a local AAR override:
+
+```sh
+KLIPY_API_KEY= ./gradlew :app:assembleDebug
+```
+
+Verify the APK signature, checksum, permissions and empty `BuildConfig.KLIPY_API_KEY`
+before replacing the root APK. Never copy a production-placement QA APK into the
+public repository. See the security verification and smoke tests below; the
+remaining creative-owned tracking issue is not resolved by this download.
+
 ### Purpose
 The goal of this demo is to provide developers with a simple and clear example of how to:
 - Retrieve GIFs, Clips, and Stickers from the Klipy API.
@@ -279,8 +302,8 @@ under the previous Android ID are not migrated or linked to the new UUID. This
 client change does not delete historical backend identifiers or verify other
 partner clients' data handling.
 
-The dependency catalog now targets **ads-android 1.1.4**, an unpublished security
-release candidate. Its renderer removes native JavaScript bridges and custom
+The dependency catalog targets the published **ads-android 1.1.4** from JitPack.
+Its renderer removes native JavaScript bridges and custom
 click tracking. Normal HTTPS links and supported new-window links require a
 completed native interaction plus Chromium gesture evidence; supported Play
 details links become HTTPS. Both main-frame and popup requests must match the
@@ -292,9 +315,16 @@ redirect flows, raw intents, HTTP and other custom schemes remain blocked.
 JavaScript remains enabled for rendering. See the SDK README for the full
 compatibility contract and partner migration notes.
 
-### Local candidate verification
+### SDK dependency verification
 
-Until 1.1.4 is published, build the SDK release AAR and supply its absolute path:
+The normal build uses the published SDK without an AAR override:
+
+```sh
+./gradlew :app:assembleDebug :app:assembleDebugAndroidTest
+ANDROID_SERIAL=<test-device> ./gradlew :app:connectedDebugAndroidTest
+```
+
+For local SDK development, build the release AAR and supply its absolute path:
 
 ```sh
 # From the ads-android repository:
@@ -387,7 +417,8 @@ This is a local QA build, not a Play upload or a test of the published artifact.
   was in use. The app was stopped after capture to end tracking retries. This
   fix does not resolve that creative's scroll tracking or establish billed clicks.
 - The updated navigation path still needs minimum-API, accessibility and actual
-  partner-keyboard verification before publication. Changes remain unpublished.
+  partner-keyboard verification before partner rollout. These checks used the
+  local candidate before publication.
 
 ### Main-frame destination binding verification — 2026-10-18
 
@@ -415,14 +446,35 @@ This is a local QA build, not a Play upload or a test of the published artifact.
   Its signer remains the local Android debug certificate recorded above.
 - This fix does not address the creative-owned InMobi scroll click tracking
   recorded above. Minimum-version, accessibility and partner-keyboard validation
-  remain pending. The SDK candidate remains unpublished.
+  remain pending. These results used the local candidate before publication.
+
+### Published SDK verification — 2026-10-18
+
+- JitPack serves `com.gitlab.kikliko:ads-android:1.1.4` from SDK commit
+  `74bfeb22cc7de3552913698fe820fed047fc3955`. The downloaded AAR is byte-for-byte
+  identical to the tested candidate above. The demo builds with the normal Maven
+  dependency, without the local AAR override.
+- The root public APK was rebuilt with an empty production-key override. Its
+  signer matches the previous root APK; cleartext is disabled and phone-state
+  and advertising-ID permissions are absent. Its checksum is recorded above.
+- The public APK installed in place on the Samsung Galaxy S24 (Android 16).
+  All 7 on-device instrumentation checks passed, including the Compose/WebView
+  tap and removal/reopening scenario. A live smoke check confirmed that the
+  default demo feed loads GIFs and categories in the conversation's media picker.
+  This does not resolve the creative-owned scroll tracking described above.
 
 ### Smoke Tests
 
-1. Use a QA emulator and test API account. Build against the exact candidate AAR.
+1. Use a QA device or emulator and test API account. Build against the published
+   1.1.4 dependency without `-PklipyAdsAar`; use an AAR override only for local SDK work.
    Verify the APK signer with `apksigner verify --verbose --print-certs`, inspect
    package/version with `aapt dump badging`, and record `shasum -a 256` for both
-   AAR and APK before installing. Use the selected emulator serial explicitly.
+   AAR and APK before installing. Use the selected device serial explicitly.
+   For the root download, build with `KLIPY_API_KEY=` and confirm the production
+   QA key is absent from the APK. Install it over the previous download with
+   `adb -s <serial> install -r KLIPY-Demo-App.apk`; expect a successful update
+   without clearing app data. Open the conversation and media picker and verify
+   the default demo feed loads before replacing the public download.
 2. Inspect the merged release manifest: `usesCleartextTraffic=false`; no
    `READ_PHONE_STATE` or advertising-ID permission. Confirm the release runtime
    dependency tree contains no advertising-ID collection dependency.
