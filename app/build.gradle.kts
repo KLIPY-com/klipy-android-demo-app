@@ -5,6 +5,10 @@ plugins {
 
 }
 
+// Optional local QA key. Never store a production key in source or Gradle properties.
+val localKlipyApiKey = providers.environmentVariable("KLIPY_API_KEY").orElse("").get()
+require(localKlipyApiKey.matches(Regex("[A-Za-z0-9_-]*"))) { "Invalid KLIPY_API_KEY format" }
+
 configurations.configureEach {
     resolutionStrategy.eachDependency {
         if (requested.group == "org.jetbrains.kotlin" && requested.name.startsWith("kotlin-stdlib")) {
@@ -24,6 +28,7 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+        buildConfigField("String", "KLIPY_API_KEY", "\"$localKlipyApiKey\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -49,6 +54,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -79,7 +85,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson.converter)
-    implementation(libs.okhttp.logging.interceptor)
+    implementation(libs.okhttp)
     implementation(libs.koin)
     implementation(libs.koin.compose)
     implementation(libs.coil.network)
@@ -87,8 +93,13 @@ dependencies {
     implementation(libs.coil.gif)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)
-    implementation(libs.kikliko)
-    implementation(libs.gms.ads)
+    // Allows testing the SDK release candidate before its Maven publication.
+    val localAdsAar = providers.gradleProperty("klipyAdsAar").orNull
+    if (localAdsAar != null) {
+        implementation(files(localAdsAar))
+    } else {
+        implementation(libs.kikliko)
+    }
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

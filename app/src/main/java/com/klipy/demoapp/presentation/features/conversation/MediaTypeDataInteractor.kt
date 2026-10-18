@@ -28,11 +28,13 @@ class MediaTypeDataInteractor(
                 canLoadMore = false
                 return@launch
             }
-            val category = categories.find { it.title.lowercase() == TRENDING }
+            val category = categories.find { it.query == TRENDING }
+            filter = category?.query.orEmpty()
             val data = category?.let {
-                    klipyRepository.getMediaData(mediaType, category.title).getOrNull()
+                    klipyRepository.getMediaData(mediaType, category.query).getOrNull()
                         ?: MediaData.EMPTY
             } ?: MediaData.EMPTY
+            canLoadMore = data.mediaItems.isNotEmpty()
             MasonryMeasurementsCalculator.itemMinWidth = data.itemMinWidth
             MasonryMeasurementsCalculator.adMaxResizePercentage = data.adMaxResizePercentage
             onInitialDataFetched.invoke(categories, category, data.mediaItems)
@@ -40,7 +42,7 @@ class MediaTypeDataInteractor(
     }
 
     fun onCategoryChosen(category: Category) {
-        filter = category.title
+        filter = category.query
         canLoadMore = true
         fetchMoreData()
     }

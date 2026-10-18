@@ -9,8 +9,6 @@ import com.klipy.demoapp.data.datasource.MediaDataSourceFactoryImpl
 import com.klipy.demoapp.data.datasource.MediaDataSourceSelector
 import com.klipy.demoapp.data.datasource.MediaDataSourceSelectorImpl
 import com.klipy.demoapp.data.datasource.StickersDataSource
-import com.klipy.demoapp.data.infrastructure.AdvertisingInfoProvider
-import com.klipy.demoapp.data.infrastructure.AdvertisingInfoProviderImpl
 import com.klipy.demoapp.data.infrastructure.ApiCallHelper
 import com.klipy.demoapp.data.infrastructure.DeviceInfoProvider
 import com.klipy.demoapp.data.infrastructure.DeviceInfoProviderImpl
@@ -64,9 +62,6 @@ val dataModule = module {
     single<DeviceInfoProvider> { DeviceInfoProviderImpl(get()) }
     single<ScreenMeasurementsProvider> {
         ScreenMeasurementsProviderImpl(androidApplication().applicationContext)
-    }
-    single<AdvertisingInfoProvider> {
-        AdvertisingInfoProviderImpl(androidApplication().applicationContext)
     }
     single<ApiCallHelper> { ApiCallHelper() }
 }

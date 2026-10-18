@@ -113,12 +113,19 @@ Once the available media types are determined through the **Health Check**, the 
 
 #### **Step 2: Fetching Categories**
 - The app calls the **`getCategories()`** method inside the **`MediaService`** interface.
-- This method fetches a list of **categories** for the selected media type.
+- Production returns `data.locale` and `data.categories` records with `category`,
+  `query`, and `preview_url`. The cached demo key still returns `data` as a string
+  list. `CategoriesMapper` handles these two verified formats at the response
+  boundary, preserving the production query separately from its display label.
+- The picker prepends its local Recent and Trending entries. Production preview
+  images use `preview_url`; cached demo categories retain their legacy image URLs.
+- Initial loading selects Trending and retains that query for pagination. Choosing
+  a category uses its `query`, while typed search uses the entered text.
 
 ##### **API Call**
 ```kotlin
 @GET("/categories")
-suspend fun getCategories(): List<CategoryDto>
+suspend fun getCategories(): Response<CategoriesResponseDto>
 ```
 <br>
 <img src="https://github.com/user-attachments/assets/f7a19ca4-deef-40a1-bbc0-32aa05dc208c" width="500"/>
@@ -249,8 +256,216 @@ This approach allows the UI to maintain a fluid and well-structured display, ada
 
 ## ADs
 
-In order to receive the best-fit advertisements, it is crucial to pass as much relevant data as possible. The **`AdsQueryParametersInterceptor`** automatically appends important query parameters to media requests that include the `@AdsQueryParameters` annotation.
+The `AdsQueryParametersInterceptor` adds rendering dimensions, locale, device and
+network metadata to requests annotated with `@AdsQueryParameters`. Minimize this
+data according to the backend contract; do not add identifiers for targeting.
 
-- This interceptor gathers **device information, screen measurements, advertising ID, user locale, and network details** to optimize ad selection.
-- It ensures that ads are dynamically tailored to the user's environment.
-- All header parameters used in this interceptor and their meanings can be found in the **[Klipy API Advertisement Documentation](https://docs.klipy.com/advertisements/receiving-an-ad)** and also within the **code comments**.
+The security update removes advertising-ID collection and its dependency, phone
+state permission, cleartext traffic, and automatic HTTP request logging. It
+strips these retired parameters from annotated requests, even if supplied by a
+caller: `ad-ifa`, `ad-didsha1`, `ad-didmd5`, `ad-dpidsha1`, `ad-dpidmd5`,
+`ad-macsha1`, `ad-macmd5`, `ad-yob`, `ad-gender`, `ad-app-version`, `ad-position`.
+
+`customer_id` is a random UUID generated on first use and persisted in the
+private `klipy_installation` preferences file. Feeds, search, Recents, share/view,
+report, and hide all use this same ID. An annotated request replaces any existing
+`customer_id` query values instead of appending another one. No Android ID or
+advertising ID is read. The initial write must succeed before the ID is returned.
+
+The ID survives restarts and app updates. Clearing app data or a fresh reinstall
+creates a new ID; the preferences file is excluded from cloud backup and device
+transfer on both legacy and Android 12+ backup configurations. Existing Recents
+under the previous Android ID are not migrated or linked to the new UUID. This
+client change does not delete historical backend identifiers or verify other
+partner clients' data handling.
+
+The dependency catalog now targets **ads-android 1.1.4**, an unpublished security
+release candidate. Its renderer removes native JavaScript bridges and custom
+click tracking. Normal HTTPS links and supported new-window links require a
+completed native interaction plus Chromium gesture evidence; supported Play
+details links become HTTPS. Both main-frame and popup requests must match the
+actual link selected by native hit testing. A popup's first validated destination
+can open, but its content cannot execute or load in the SDK. JavaScript-only
+navigation buttons or substituted URLs remain unsupported in either path.
+Automatic navigation, blank-window
+redirect flows, raw intents, HTTP and other custom schemes remain blocked.
+JavaScript remains enabled for rendering. See the SDK README for the full
+compatibility contract and partner migration notes.
+
+### Local candidate verification
+
+Until 1.1.4 is published, build the SDK release AAR and supply its absolute path:
+
+```sh
+# From the ads-android repository:
+./gradlew :ads-android:assembleRelease
+# From this repository:
+./gradlew :app:testDebugUnitTest :app:lintRelease :app:assembleDebug \
+  :app:assembleDebugAndroidTest -PklipyAdsAar=/absolute/path/to/ads-android-release.aar
+ANDROID_SERIAL=<test-emulator> ./gradlew :app:connectedDebugAndroidTest \
+  -PklipyAdsAar=/absolute/path/to/ads-android-release.aar
+```
+
+For a production-placement QA build, set `KLIPY_API_KEY` in the local build
+environment. The value is compiled into the APK; do not commit the key or share
+that QA artifact publicly. With the variable absent or empty, the existing cached
+demo feed is used. Production targeting must be tested using the production key
+and actual Android rendering parameters; cached demo ads can target other devices.
+
+The AAR override is command-local. Without it, the build requires the published
+1.1.4 artifact; it must not silently use the vulnerable 1.1.3 release.
+Request tests verify retired parameter removal without making network calls.
+`AdMediaItemIntegrationTest` exercises the actual Compose/WebView boundary,
+including render, deliberate `_self`/`_blank` taps, removal and reopening, using an offline fixture
+and intercepted native launches. The SDK owns the malicious-creative suite.
+
+Historical verification on 2026-10-16: all 3 request tests plus the existing unit test
+passed; debug APK/test APK builds and release lint passed (0 errors, 43 warnings,
+including the unresolved Android-ID warning). The Compose integration test passed
+on API 37 / WebView 153.0.8010.36 against the local candidate AAR. The merged
+release manifest has cleartext disabled and neither phone-state nor advertising-ID
+permissions; the release dependency tree has no advertising-ID dependency.
+The debug APK was verified with the local Android debug certificate and has
+SHA-256 `a8a813a31f331fa47248a2dfec65a13b5e6aaf8cda1377dd48572335c464635c`.
+This is a local QA build, not a Play upload or a test of the published artifact.
+
+### UUID update verification — 2026-10-18
+
+- JVM tests: 9 passed, including real Retrofit request serialization for GIF,
+  Clip, and Sticker feeds/search/Recents/share/view/report/hide with one UUID.
+- Samsung SM-S921U1, Android 16 / API 36, WebView 154.0.8037.106: 5 identity
+  instrumentation tests and the existing Compose ad integration test passed.
+  Identity tests cover recreation, reset of isolated test storage, concurrent
+  first use, persistence failure, and both backup-exclusion configurations.
+- The installed UUID remained unchanged through an app update and process restart
+  on the Samsung. GIFs, Clips, and Stickers now load categories, Trending media,
+  and ads through the normal picker opening flow, without the search workaround.
+- Debug APK/test APK builds and release lint passed: 0 errors, 44 warnings.
+  The Android-ID warning is gone. The first UUID uses synchronous `commit()`
+  intentionally so a failed initial write cannot return a temporary identity.
+- Production QA debug APK SHA-256:
+  `9d201320b0a31af168a00acb9a3d9d2d50f21a436c6f42c305a380ff707ef47f`.
+  Its local debug signer SHA-256 is
+  `22976ddf08afb895328e44769138bb42790d7836a790a6b490b09861b9bc959c`.
+- The new production-placement key returned HTTP 200 for all three media feeds
+  (20 items and 2 ads each), category reads, and a Recents read with the new UUID.
+  The key is supplied only through the local build environment.
+- Production categories returned `data: {locale, categories: [{category, query,
+  preview_url}]}` while the cached demo still returned a string list. The mapper
+  now supports both observed shapes. Regression coverage verifies initial
+  Trending, Recents, category queries that differ from labels, search, caching,
+  empty results, and category failures without fabricating missing fields.
+- A live production-search swipe/tap check did not reproduce the earlier
+  touch-start InMobi pattern and recorded no external activity starts. Different
+  creatives were served; the original scroll-tracking issue is not resolved by
+  this UUID change. Live WebView capture is partial, not a full network audit.
+
+### Click-through update verification — 2026-10-18
+
+- The SDK now supports native-verified `_blank` links and matching popup click
+  handlers. A popup must match the actual anchor selected by native hit testing;
+  JavaScript-only popup buttons, substituted URLs and blank-window flows remain
+  unsupported. A completed tap and Chromium gesture evidence are both required.
+- On Samsung SM-S921U1 / Android 16 / WebView 154.0.8037.106, all 12 SDK device
+  tests and all 7 demo device tests passed. The demo's owning Compose test now
+  exercises `_blank` click-through across removal and reopening. All 3 SDK and
+  9 demo JVM tests passed. SDK/demo builds passed; lint had 0 errors (3 SDK and
+  44 demo warnings). The existing installation UUID was unchanged by the update.
+- Candidate AAR SHA-256:
+  `1e161ccb14f2996a2e1b48d5f02256a44e8f03febce7f4ec3bc735a821ca7376`.
+  Production QA debug APK SHA-256:
+  `844ada4b0b5e37af6f91b915d89b2186f1175b3eb118268b7fa9a611996c7b5b`.
+  Signer remains the local Android debug certificate recorded above.
+- A live banner's exact `ad-iframe=1` creative URL was compared in the demo and
+  Samsung Chrome. Both intentional taps reached the identical advertiser landing
+  URL; the preceding demo swipe caused no external launch. Curl returned 200
+  for the creative URL. Only that sample establishes browser/WebView parity.
+- **Remaining production issue:** a fresh InMobi “Golden Whiskers Slot” creative
+  sent its two declared `CLICK` trackers on a swipe, receiving HTTP 204 and 200,
+  and attempted a `market:` popup with `userGesture=false`. The SDK blocked the
+  external launch; creative-owned tracking still happened. The production key
+  was in use. The app was stopped after capture to end tracking retries. This
+  fix does not resolve that creative's scroll tracking or establish billed clicks.
+- The updated navigation path still needs minimum-API, accessibility and actual
+  partner-keyboard verification before publication. Changes remain unpublished.
+
+### Main-frame destination binding verification — 2026-10-18
+
+- The rebuilt demo uses an SDK candidate that applies the native-selected link
+  check to both main-frame and popup requests. A completed tap and Chromium's
+  gesture flag alone are insufficient: live testing had shown an independent
+  timer could reuse a non-link tap through the old main-frame path.
+- The regression failed before the fix. All 12 SDK and 7 demo device tests now
+  pass on Samsung SM-S921U1 / Android 16 / WebView 154.0.8037.106. The Compose ad
+  test covers both `_self` and `_blank` across removal/reopening. SDK/demo builds
+  and lint passed, with 0 errors and 3/44 warnings respectively.
+- Live testing of the installed demo confirmed that timers armed before a real
+  tap on an inert area no longer launch, whether they request main-frame or
+  popup navigation. Substituted destinations, rewritten anchors, JavaScript-only
+  buttons, raw intents and HTTP links stayed blocked. JavaScript navigation
+  without a matching real anchor is intentionally unsupported in both paths.
+- A fresh production Chumba banner opened Chrome. Controlled same-window HTTPS
+  and Play Store links opened their actual Android handlers once each; swiping
+  the store link launched nothing. The crash buffer was empty. Runtime probes
+  were temporary; no test content or debugging bridge was added to the app.
+- Candidate AAR SHA-256:
+  `3f979a83fd31802570c578cf648328ccfa3a289d5295770449831acddf33c456`.
+  Installed production-placement QA debug APK SHA-256:
+  `b7d03ecddfd84fa0173dc5b985673b9d501705454ee2f4411b18541bbee2a238`.
+  Its signer remains the local Android debug certificate recorded above.
+- This fix does not address the creative-owned InMobi scroll click tracking
+  recorded above. Minimum-version, accessibility and partner-keyboard validation
+  remain pending. The SDK candidate remains unpublished.
+
+### Smoke Tests
+
+1. Use a QA emulator and test API account. Build against the exact candidate AAR.
+   Verify the APK signer with `apksigner verify --verbose --print-certs`, inspect
+   package/version with `aapt dump badging`, and record `shasum -a 256` for both
+   AAR and APK before installing. Use the selected emulator serial explicitly.
+2. Inspect the merged release manifest: `usesCleartextTraffic=false`; no
+   `READ_PHONE_STATE` or advertising-ID permission. Confirm the release runtime
+   dependency tree contains no advertising-ID collection dependency.
+3. Run the request and Compose integration tests above, then the SDK's security
+   suite. No production ad impressions/clicks should be used for these tests.
+4. Open KLIPY conversation → media picker, first with the cached demo key and
+   then with a local production-placement key. Each media tab must show Recent,
+   Trending, and fetched category previews; Trending loads automatically. Select
+   a category and confirm its query drives results, then test typed search,
+   clearing search, switching tabs, and pagination. Test offline/failed category
+   requests and empty feeds: no crash or repeated request with a blank filter.
+   Verify a controlled ad fits its grid cell.
+   Leave it idle: no external launch. Tap an ordinary HTTPS link, a `_blank` link,
+   or a supported click-time `window.open` CTA: one launch. Swipe across the ad or
+   cancel the touch: no launch. Return, close and reopen the picker, and repeat.
+5. Use controlled creatives for popups, timers, nested frames, forged bridge
+   calls/messages, raw intents and invalid URLs. Expect no automatic external
+   launch and no fallback for unsupported links. Test main-frame redirects and
+   popups independently: schedule a timer before touching a non-clickable area,
+   then tap it before the timer fires. Neither path may open a destination. Also
+   check a click handler that changes its anchor or navigates to an unrelated URL;
+   both must be blocked while matching real anchor links still work. Check network capture for
+   retired ad fields and cleartext requests; inspect release logs for identifiers.
+   For separately authorized live testing, save a returned `ad-iframe=1` creative
+   URL privately and compare that same creative/CTA in the Samsung browser and
+   the demo. Record idle, swipe and tap independently, including the actual ad
+   and destination served in each surface. A browser-only success is a remaining
+   compatibility gap. Do not log full creative URLs or the production key in
+   source/release logs. Native launch blocking does not prevent a creative from
+   sending its own click-tracking requests; inspect those separately.
+6. Run `CustomerIdIntegrationTest` and `MediaCustomerIdIntegrationTest`. On a
+   disposable QA installation, open the picker, restart the app, and confirm the
+   stored UUID and outgoing `customer_id` remain unchanged. Check feeds, search,
+   Recents, share/view, report, and hide requests use that same ID. Clear only the
+   disposable installation's data and reopen: expect a new UUID and fresh Recents.
+   Verify both backup XML files exclude `klipy_installation.xml`; restore/cloud
+   and device-transfer smoke tests must not restore the prior installation ID.
+   With disposable QA content, verify share then Recents, hide then Recents, and
+   report/view behavior against the backend. Automated tests intercept these
+   operations; they do not create live reports, shares, or deletes.
+7. Before distribution, verify a published 1.1.4 build without the local override,
+   and repeat with a representative partner keyboard host. Do not roll back to
+   the earlier unsafe click bridge if a network creative is incompatible.
+
+Passing these tests demonstrates specific safeguards, not Google Play approval
+or a completed review of backend data processing and other SDKs.

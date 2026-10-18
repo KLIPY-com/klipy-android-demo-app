@@ -1,7 +1,6 @@
 package com.klipy.demoapp.data.infrastructure.interceptor
 
 import android.os.Build
-import com.klipy.demoapp.data.infrastructure.AdvertisingInfoProvider
 import com.klipy.demoapp.data.infrastructure.DeviceInfoProvider
 import com.klipy.demoapp.data.infrastructure.ScreenMeasurementsProvider
 import okhttp3.Interceptor
@@ -11,8 +10,7 @@ import java.util.Locale
 
 class AdsQueryParametersInterceptor(
     private val deviceInfoProvider: DeviceInfoProvider,
-    private val screenMeasurementsProvider: ScreenMeasurementsProvider,
-    private val advertisingInfoProvider: AdvertisingInfoProvider
+    private val screenMeasurementsProvider: ScreenMeasurementsProvider
 ) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -26,10 +24,9 @@ class AdsQueryParametersInterceptor(
             val originalHttpUrl = originalRequest.url
 
             val newHttpUrl = originalHttpUrl.newBuilder()
-                //  User's unique identifier in the app (e.g., GUID).
-                //  It is used for analytics and displaying relevant trending and search results.
-                //  For the sake of simplicity, we are using device id
-                .addQueryParameter(CUSTOMER_ID, deviceInfoProvider.getDeviceId())
+                .apply { RETIRED_AD_PARAMETERS.forEach(::removeAllQueryParameters) }
+                // Match the installation identity used by Recents and media actions.
+                .setQueryParameter(CUSTOMER_ID, deviceInfoProvider.getCustomerId())
                 .addQueryParameter(AD_IFRAME, ENABLED)
                 .addQueryParameter(LOCALE, Locale.getDefault().language)
                 .addQueryParameter(AD_MIN_WIDTH, "50")
@@ -39,13 +36,6 @@ class AdsQueryParametersInterceptor(
                 )
                 .addQueryParameter(AD_MIN_HEIGHT, "50")
                 .addQueryParameter(AD_MAX_HEIGHT, "200")
-                .apply {
-                    val ifa = advertisingInfoProvider.getAdvertisingId()
-                    if (ifa != null) {
-                        addQueryParameter(IFA, ifa)
-                    }
-                }
-                .addQueryParameter(APP_VERSION, "1.0")
                 .addQueryParameter(OS, "Android")
                 .addQueryParameter(OS_VERSION, Build.VERSION.RELEASE)
                 .addQueryParameter(MANUFACTURER, Build.MANUFACTURER)
@@ -75,10 +65,6 @@ class AdsQueryParametersInterceptor(
                         addQueryParameter(AD_MCCMNC, networkOperator)
                     }
                 }
-                // Year of birth of user, hardcoded for sample
-                .addQueryParameter(AD_YOB, "1980")
-                // Gender of user, hardcoded for sample
-                .addQueryParameter(AD_GENDER, "M")
                 .build()
 
             val newRequest = originalRequest.newBuilder()
@@ -104,21 +90,21 @@ class AdsQueryParametersInterceptor(
         const val AD_MIN_HEIGHT = "ad-min-height"
         const val AD_MAX_HEIGHT = "ad-max-height"
         const val USER_AGENT = "User-Agent"
-        const val APP_VERSION = "ad-app-version"
         const val OS = "ad-os"
         const val OS_VERSION = "ad-osv"
         const val MANUFACTURER = "ad-make"
         const val MODEL = "ad-model"
-        const val IFA = "ad-ifa"
         const val LOCALE = "locale"
         const val AD_DEVICE_WIDTH = "ad-device-w"
         const val AD_DEVICE_HEIGHT = "ad-device-h"
-        const val AD_YOB = "ad-yob"
-        const val AD_GENDER = "ad-gender"
         const val AD_PXRATIO = "ad-pxratio"
         const val AD_CARRIER = "ad-carrier"
         const val AD_MCCMNC = "ad-mccmnc"
         const val AD_LANGUAGE = "ad-language"
         const val ENABLED = "1"
+        val RETIRED_AD_PARAMETERS = setOf(
+            "ad-ifa", "ad-didsha1", "ad-didmd5", "ad-dpidsha1", "ad-dpidmd5",
+            "ad-macsha1", "ad-macmd5", "ad-yob", "ad-gender", "ad-app-version", "ad-position"
+        )
     }
 }

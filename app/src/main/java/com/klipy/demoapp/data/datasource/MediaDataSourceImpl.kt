@@ -5,6 +5,7 @@ import com.klipy.demoapp.data.dto.request.TriggerViewRequestDto
 import com.klipy.demoapp.data.infrastructure.ApiCallHelper
 import com.klipy.demoapp.data.infrastructure.DeviceInfoProvider
 import com.klipy.demoapp.data.mapper.MediaItemMapper
+import com.klipy.demoapp.data.mapper.toCategories
 import com.klipy.demoapp.data.service.MediaService
 import com.klipy.demoapp.domain.models.Category
 import com.klipy.demoapp.domain.models.MediaData
@@ -20,7 +21,7 @@ class MediaDataSourceImpl(
 ) : MediaDataSource {
     // Store categories in memory
     private var categories = emptyList<Category>()
-    private val customerId = deviceInfoProvider.getDeviceId()
+    private val customerId = deviceInfoProvider.getCustomerId()
 
     private var currentPage = INITIAL_PAGE
     private var currentFilter = ""
@@ -31,11 +32,7 @@ class MediaDataSourceImpl(
             apiCallHelper.makeApiCall {
                 mediaService.getCategories()
             }.mapCatching { result ->
-                val list = result.data?.toMutableList()
-                list?.addAll(0, listOf(RECENT, TRENDING))
-                val mappedList = list?.map {
-                    Category(title = it, url = it.toCategoryUrl())
-                } ?: emptyList()
+                val mappedList = result.toCategories()
                 categories = mappedList
                 mappedList
             }
@@ -114,10 +111,6 @@ class MediaDataSourceImpl(
         return apiCallHelper.makeApiCall {
             mediaService.hideFromRecent(customerId, slug)
         }
-    }
-
-    private fun String.toCategoryUrl(): String {
-        return "https://api.klipy.com/assets/images/category/${this}.png"
     }
 
     private companion object {
